@@ -1,0 +1,2 @@
+chainlib-eth~=0.4.8
+erc20-faucet̃~=0.5.0
