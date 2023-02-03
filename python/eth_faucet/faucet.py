@@ -74,3 +74,15 @@ class EthFaucet(Faucet):
         tx = self.set_code(tx, data)
         tx = self.finalize(tx, tx_format)
         return tx
+
+
+    def set_registry(self, contract_address, sender_address, checker_address, tx_format=TxFormat.JSONRPC):
+        enc = ABIContractEncoder()
+        enc.method('setRegistry')
+        enc.typ(ABIContractType.ADDRESS)
+        enc.address(checker_address)
+        data = enc.get()
+        tx = self.template(sender_address, contract_address, use_nonce=True)
+        tx = self.set_code(tx, data)
+        tx = self.finalize(tx, tx_format)
+        return tx

@@ -29,10 +29,10 @@ moddir = os.path.dirname(__file__)
 datadir = os.path.join(moddir, '..', 'eth_faucet', 'data')
 
 
-class TestFaucet(EthTesterCase):
+class TestFaucetPeriod(EthTesterCase):
 
     def setUp(self):
-        super(TestFaucet, self).setUp()
+        super(TestFaucetPeriod, self).setUp()
         # DRY
         self.conn = RPCConnection.connect(self.chain_spec, 'default')
         nonce_oracle = RPCNonceOracle(self.accounts[0], self.conn)
@@ -51,7 +51,7 @@ class TestFaucet(EthTesterCase):
         o = receipt(tx_hash_hex)
         r = self.conn.do(o)
         self.assertEqual(r['status'], 1)
-        self.period_store_contract = r['contract_address']
+        self.period_store_address = r['contract_address']
 
         o = block_by_number(r['block_number'])
         r = self.conn.do(o)
@@ -70,7 +70,7 @@ class TestFaucet(EthTesterCase):
         self.address = to_checksum_address(r['contract_address'])
         logg.debug('faucet contract {}'.format(self.address))
 
-        (tx_hash_hex, o) = c.set_period_checker(self.address, self.accounts[0], self.period_store_contract)
+        (tx_hash_hex, o) = c.set_period_checker(self.address, self.accounts[0], self.period_store_address)
         self.conn.do(o)
 
         o = receipt(tx_hash_hex)
@@ -86,7 +86,7 @@ class TestFaucet(EthTesterCase):
         enc.typ(ABIContractType.UINT256)
         enc.uint256(100)
         data = enc.get()
-        tx = c.template(self.accounts[0], self.period_store_contract, use_nonce=True)
+        tx = c.template(self.accounts[0], self.period_store_address, use_nonce=True)
         tx = c.set_code(tx, data)
         (tx_hash_hex, o) = c.finalize(tx)
         self.conn.do(o)
@@ -101,7 +101,7 @@ class TestFaucet(EthTesterCase):
         enc.typ(ABIContractType.ADDRESS)
         enc.address(self.address)
         data = enc.get()
-        tx = c.template(self.accounts[0], self.period_store_contract, use_nonce=True)
+        tx = c.template(self.accounts[0], self.period_store_address, use_nonce=True)
         tx = c.set_code(tx, data)
         (tx_hash_hex, o) = c.finalize(tx)
         self.conn.do(o)

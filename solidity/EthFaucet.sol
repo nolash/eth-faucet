@@ -60,16 +60,18 @@ contract EthFacuet {
 
 		(_ok, _result) = periodChecker.call(abi.encodeWithSignature("check(address)", _recipient));
 		if (!_ok) {
+			emit FaucetFail(_recipient, address(0), amount);
 			revert('ERR_PERIOD_BACKEND_ERROR');
 		}
 		if (_result[31] == 0) {
+			emit FaucetFail(_recipient, address(0), amount);
 			revert('ERR_PERIOD_CHECK');
 		}
 
 		(_ok, _result) = periodChecker.call(abi.encodeWithSignature("poke(address)", _recipient));
 		if (!_ok) {
 			emit FaucetFail(_recipient, address(0), amount);
-			revert('ERR_PERIOD_CHECK_REGISTER');
+			revert('ERR_REGISTRY_BACKEND_ERROR');
 		}
 		return true;
 	}
@@ -83,7 +85,11 @@ contract EthFacuet {
 			emit FaucetFail(_recipient, address(0), amount);
 			revert('ERR_TRANSFER');
 		}
-			
+		if (_result[31] == 0) {
+			emit FaucetFail(_recipient, address(0), amount);
+			revert('ERR_REGISTRY_CHECK');
+		}
+
 		emit FaucetUsed(_recipient, address(0), amount);
 		return true;
 	}
