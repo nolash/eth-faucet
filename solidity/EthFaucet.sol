@@ -65,6 +65,12 @@ contract EthFacuet {
 		if (_result[31] == 0) {
 			revert('ERR_PERIOD_CHECK');
 		}
+
+		(_ok, _result) = periodChecker.call(abi.encodeWithSignature("poke(address)", _recipient));
+		if (!_ok) {
+			emit FaucetFail(_recipient, address(0), amount);
+			revert('ERR_PERIOD_CHECK_REGISTER');
+		}
 		return true;
 	}
 

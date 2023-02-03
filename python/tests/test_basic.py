@@ -41,7 +41,10 @@ class TestFaucet(EthTesterCase):
         c = EthFaucet(self.chain_spec, signer=self.signer, nonce_oracle=nonce_oracle)
         (tx_hash_hex, o) = c.give_to(self.address, self.accounts[0], self.accounts[2])
         self.conn.do(o)
-
+        o = receipt(tx_hash_hex)
+        r = self.conn.do(o)
+        self.assertEqual(r['status'], 1)
+        
         o = balance(self.accounts[9])
         r = self.conn.do(o)
         prebalance = int(r, 16)

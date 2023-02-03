@@ -21,8 +21,16 @@ contract PeriodSimple {
 		period = _period;
 	}
 
+	function setPoker(address _poker) public {
+		require(msg.sender == owner);
+		poker = _poker;
+	}
+
 	function check(address _subject) public view returns(bool) {
-		return block.timestamp < lastUsed[_subject] + period;
+		if (lastUsed[_subject] == 0) {
+			return true;
+		}
+		return block.timestamp > lastUsed[_subject] + period;
 	}
 
 	function poke(address _subject) public {

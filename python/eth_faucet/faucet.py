@@ -16,6 +16,7 @@ from chainlib.eth.contract import (
         ABIContractEncoder,
         ABIContractType,
         )
+from chainlib.eth.tx import TxFormat
 from erc20_faucet import Faucet
 from hexathon import add_0x
 
@@ -61,3 +62,15 @@ class EthFaucet(Faucet):
         tx = self.template(sender_address, None, use_nonce=True)
         tx = self.set_code(tx, code)
         return self.build(tx)
+
+
+    def set_period_checker(self, contract_address, sender_address, checker_address, tx_format=TxFormat.JSONRPC):
+        enc = ABIContractEncoder()
+        enc.method('setPeriodChecker')
+        enc.typ(ABIContractType.ADDRESS)
+        enc.address(checker_address)
+        data = enc.get()
+        tx = self.template(sender_address, contract_address, use_nonce=True)
+        tx = self.set_code(tx, data)
+        tx = self.finalize(tx, tx_format)
+        return tx
