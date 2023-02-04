@@ -18,7 +18,8 @@ from chainlib.eth.contract import ABIContractType
 from chainlib.eth.block import block_by_number
 
 # local imports
-from eth_faucet.faucet import EthFaucet
+from eth_faucet import EthFaucet
+from eth_faucet.period import PeriodSimple
 
 logging.basicConfig(level=logging.DEBUG)
 logg = logging.getLogger()
@@ -34,6 +35,10 @@ class TestFaucetPeriod(EthTesterCase):
     def setUp(self):
         super(TestFaucetPeriod, self).setUp()
         # DRY
+        c = PeriodSimple(self.chain_spec, signer=self.signer, nonce_oracle=nonce_oracle)
+        (tx_hash_hex, o) = c.constructor(self.accounts[0])
+        r = self.conn.do(o)
+
         self.conn = RPCConnection.connect(self.chain_spec, 'default')
         nonce_oracle = RPCNonceOracle(self.accounts[0], self.conn)
 

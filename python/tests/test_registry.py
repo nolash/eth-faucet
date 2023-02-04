@@ -19,7 +19,7 @@ from chainlib.eth.block import block_by_number
 from eth_accounts_index.registry import AccountRegistry
 
 # local imports
-from eth_faucet.faucet import EthFaucet
+from eth_faucet import EthFaucet
 
 logging.basicConfig(level=logging.DEBUG)
 logg = logging.getLogger()
@@ -64,6 +64,24 @@ class TestFaucetRegistry(EthTesterCase):
         logg.debug('faucet contract {}'.format(self.address))
 
         (tx_hash_hex, o) = c.set_registry(self.address, self.accounts[0], self.registry_address)
+        self.conn.do(o)
+        o = receipt(tx_hash_hex)
+        r = self.conn.do(o)
+        self.assertEqual(r['status'], 1)
+
+
+    def test_basic(self):
+        nonce_oracle = RPCNonceOracle(self.accounts[0], self.conn)
+        c = EthFaucet(self.chain_spec, signer=self.signer, nonce_oracle=nonce_oracle)
+        (tx_hash_hex, o) = c.give_to(self.address, self.accounts[0], self.accounts[2])
+        self.conn.do(o)
+        o = receipt(tx_hash_hex)
+        r = self.conn.do(o)
+        self.assertEqual(r['status'], 0)
+
+        nonce_oracle = RPCNonceOracle(self.accounts[2], self.conn)
+        c = EthFaucet(self.chain_spec, signer=self.signer, nonce_oracle=nonce_oracle)
+        (tx_hash_hex, o) = c.gimme(self.address, self.accounts[1])
         self.conn.do(o)
         o = receipt(tx_hash_hex)
         r = self.conn.do(o)
