@@ -92,7 +92,7 @@ class TestFaucet(EthTesterCase):
         self.assertEqual(int(r, 16), prebalance + 1000)
 
 
-    def test_basic(self):
+    def test_basic_fund(self):
         nonce_oracle = RPCNonceOracle(self.accounts[0], self.conn)
         c = EthFaucet(self.chain_spec, signer=self.signer, nonce_oracle=nonce_oracle)
 
@@ -128,6 +128,16 @@ class TestFaucet(EthTesterCase):
         o = balance(self.accounts[1])
         r = self.conn.do(o)
         self.assertEqual(int(r, 16), prebalance - cost + 1000)
+
+
+    def test_basic_self(self):
+        nonce_oracle = RPCNonceOracle(self.accounts[2], self.conn)
+        c = EthFaucet(self.chain_spec, signer=self.signer, nonce_oracle=nonce_oracle)
+        (tx_hash_hex, o) = c.gimme(self.address, self.accounts[2])
+        self.conn.do(o)
+        o = receipt(tx_hash_hex)
+        r = self.conn.do(o)
+        self.assertEqual(r['status'], 1)
 
 
 if __name__ == '__main__':

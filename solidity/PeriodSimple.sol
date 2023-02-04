@@ -7,6 +7,7 @@ contract PeriodSimple {
 	address public owner;
 	address public poker;
 	uint256 public period;
+	uint256 public balanceThreshold;
 	mapping (address => uint256) public lastUsed;
 
 	event PeriodChange(uint256 _value);
@@ -26,7 +27,13 @@ contract PeriodSimple {
 		poker = _poker;
 	}
 
+	function setBalanceThreshold(uint256 _threshold) public {
+		require(msg.sender == owner);
+		balanceThreshold = _threshold;
+	}
+
 	function check(address _subject) public view returns(bool) {
+		require(_subject.balance >= balanceThreshold);
 		if (lastUsed[_subject] == 0) {
 			return true;
 		}
