@@ -129,6 +129,28 @@ class TestFaucet(EthTesterCase):
         r = self.conn.do(o)
         self.assertEqual(int(r, 16), prebalance - cost + 1000)
 
+    def test_payable_with_tx_data(self):
+        nonce_oracle = RPCNonceOracle(self.accounts[0], self.conn)
+        c = EthFaucet(self.chain_spec, signer=self.signer, nonce_oracle=nonce_oracle)
+
+        o = balance(self.accounts[0])
+        r = self.conn.do(o)
+        prebalance = int(r, 16)
+
+        gas_price = 1000000000
+        contract_gas_oracle = OverrideGasOracle(limit=21055, price=gas_price, conn=self.conn)
+        cg = Gas(self.chain_spec, signer=self.signer, nonce_oracle=nonce_oracle, gas_oracle=contract_gas_oracle)
+        (tx_hash_hex, o) = cg.create(self.accounts[0], self.address, 1000, data='0x0')
+        self.conn.do(o)
+
+        o = receipt(tx_hash_hex)
+        r = self.conn.do(o)
+        cost = r['gas_used'] * gas_price
+        self.assertEqual(r['status'], 0)
+
+        o = balance(self.accounts[0])
+        r = self.conn.do(o)
+        self.assertEqual(int(r, 16), prebalance - cost)
 
     def test_basic_self(self):
         nonce_oracle = RPCNonceOracle(self.accounts[2], self.conn)
