@@ -19,6 +19,7 @@ contract EthFacuet {
 	event FaucetFail(address indexed _recipient, address indexed _token, uint256 _amount);
 	event FaucetAmountChange(uint256 _amount);
 	event FaucetStateChange(uint256 indexed _sealState, address _registry, address _periodChecker);
+	event ImNotGassy();
 
 	constructor() {
 		owner = msg.sender;
@@ -94,6 +95,13 @@ contract EthFacuet {
 		return true;
 	}
 
+	function checkBalance() private {
+		if (amount > address(this).balance) {
+			emit ImNotGassy();
+			revert('ERR_ITSNOTAGAS');
+		}
+	}
+
 	function check(address _recipient) private returns(bool) {
 		if (periodChecker != address(0)) {
 			checkPeriod(_recipient);
@@ -101,9 +109,9 @@ contract EthFacuet {
 		if (registry != address(0)) {
 			checkRegistry(_recipient);
 		}
+		checkBalance();
 		return true;
 	}
-
 
 	function gimme() public returns(uint256) {
 		require(check(msg.sender));
