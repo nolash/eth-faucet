@@ -15,8 +15,13 @@ argparser = argparse.ArgumentParser()
 argparser.add_argument('name', type=str, default='faucet', choices=['faucet', 'period'], help='list code identifiers')
 args = argparser.parse_args(sys.argv[1:])
 
-fp = os.path.join(data_dir, tr[args.name] + '.bin')
-f = open(fp, 'r')
-r = f.read()
-f.close()
-print(r)
+def main():
+    fp = os.path.join(data_dir, tr[args.name] + '.bin')
+    f = open(fp, 'r')
+    r = f.read()
+    f.close()
+    print(r)
+
+
+if __name__ == '__main__':
+    main()

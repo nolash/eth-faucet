@@ -11,7 +11,7 @@ contract PeriodSimple {
 	mapping (address => uint256) public lastUsed;
 
 	event PeriodChange(uint256 _value);
-
+	event BalanceThresholdChange(uint256 _value);
 	constructor() {
 		owner = msg.sender;
 		poker = owner;
@@ -20,6 +20,7 @@ contract PeriodSimple {
 	function setPeriod(uint256 _period) public {
 		require(owner == msg.sender, 'ERR_NOT_OWNER');
 		period = _period;
+		emit PeriodChange(_period);
 	}
 
 	function setPoker(address _poker) public {
@@ -30,6 +31,7 @@ contract PeriodSimple {
 	function setBalanceThreshold(uint256 _threshold) public {
 		require(msg.sender == owner);
 		balanceThreshold = _threshold;
+		emit BalanceThresholdChange(_threshold);
 	}
 
 	function check(address _subject) public view returns(bool) {
