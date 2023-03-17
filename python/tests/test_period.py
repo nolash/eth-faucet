@@ -35,12 +35,11 @@ class TestFaucetPeriod(EthTesterCase):
     def setUp(self):
         super(TestFaucetPeriod, self).setUp()
         # DRY
+        self.conn = RPCConnection.connect(self.chain_spec, 'default')
+        nonce_oracle = RPCNonceOracle(self.accounts[0], self.conn)
         c = PeriodSimple(self.chain_spec, signer=self.signer, nonce_oracle=nonce_oracle)
         (tx_hash_hex, o) = c.constructor(self.accounts[0])
         r = self.conn.do(o)
-
-        self.conn = RPCConnection.connect(self.chain_spec, 'default')
-        nonce_oracle = RPCNonceOracle(self.accounts[0], self.conn)
 
         f = open(os.path.join(datadir, 'PeriodSimple.bin'))
         period_store_bytecode = f.read()

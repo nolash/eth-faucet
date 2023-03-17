@@ -61,21 +61,13 @@ contract EthFacuet {
 
 		(_ok, _result) = periodChecker.call(abi.encodeWithSignature("check(address)", _recipient));
 		if (!_ok) {
-			emit FaucetFail(_recipient, address(0), amount);
-			revert('ERR_PERIOD_BACKEND_ERROR');
+			revert('ERR_PERIOD_BACKEND');
 		}
 		if (_result[31] == 0) {
-			emit FaucetFail(_recipient, address(0), amount);
-			revert('ERR_PERIOD_CHECK');
+			return false;
 		}
 
-		(_ok, _result) = periodChecker.call(abi.encodeWithSignature("poke(address)", _recipient));
-		if (!_ok) {
-			emit FaucetFail(_recipient, address(0), amount);
-			revert('ERR_REGISTRY_BACKEND_ERROR');
-		}
-		return true;
-	}
+			}
 
 	function checkRegistry(address _recipient) private returns(bool) {
 		bool _ok;
@@ -84,7 +76,7 @@ contract EthFacuet {
 		(_ok, _result) = registry.call(abi.encodeWithSignature("have(address)", _recipient));
 		if (!_ok) {
 			emit FaucetFail(_recipient, address(0), amount);
-			revert('ERR_TRANSFER');
+			revert('ERR_REGISTRY_BACKEND');
 		}
 		if (_result[31] == 0) {
 			emit FaucetFail(_recipient, address(0), amount);
@@ -95,14 +87,15 @@ contract EthFacuet {
 		return true;
 	}
 
-	function checkBalance() private {
+	function checkBalance() private returns(bool) {
 		if (amount > address(this).balance) {
+			return false;
 			emit ImNotGassy();
 			revert('ERR_ITSNOTAGAS');
 		}
 	}
 
-	function check(address _recipient) private returns(bool) {
+	function checkCanPoke(address _recipient) private returns(uint256) {
 		if (periodChecker != address(0)) {
 			checkPeriod(_recipient);
 		}
@@ -112,15 +105,27 @@ contract EthFacuet {
 		checkBalance();
 		return true;
 	}
+	
+	function check(address _recipient) public returns(bool){
+		bool _ok;
+		bytes memory _result;
+
+		(_ok, _result) = periodChecker.call(abi.encodeWithSignature("poke(address)", _recipient));
+		if (!_ok) {
+			emit FaucetFail(_recipient, address(0), amount);
+			revert('ERR_PERIOD_BACKEND');
+		}
+		return true;
+	}
 
 	function gimme() public returns(uint256) {
-		require(check(msg.sender));
+		require(checkCanPoke(msg.sender));
 		payable(msg.sender).transfer(amount);
 		return amount;
 	}
 
 	function giveTo(address _recipient) public returns(uint256) {
-		require(check(_recipient));
+		require(checkCanPoke(_recipient));
 		payable(_recipient).transfer(amount);
 		return amount;
 	}

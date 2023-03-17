@@ -104,5 +104,13 @@ class TestFaucetRegistry(EthTesterCase):
         self.assertEqual(r['status'], 1)
 
 
+    def test_transparent(self):
+        nonce_oracle = RPCNonceOracle(self.accounts[0], self.conn)
+        c = EthFaucet(self.chain_spec, signer=self.signer, nonce_oracle=nonce_oracle)
+        o = c.check(self.address, self.accounts[2], sender_address=self.accounts[0])
+        r = self.conn.do(o)
+        self.assertEqual(int(r, 16), 1)
+
+
 if __name__ == '__main__':
     unittest.main()

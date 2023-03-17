@@ -17,6 +17,7 @@ from chainlib.eth.contract import (
         ABIContractType,
         )
 from chainlib.eth.tx import TxFormat
+from chainlib.jsonrpc import JSONRPCRequest
 from erc20_faucet import Faucet
 from hexathon import add_0x
 
@@ -86,3 +87,21 @@ class EthFaucet(Faucet):
         tx = self.set_code(tx, data)
         tx = self.finalize(tx, tx_format)
         return tx
+
+
+    def check(self, contract_address, address, sender_address=ZERO_ADDRESS, id_generator=None):
+        j = JSONRPCRequest(id_generator)
+        o = j.template()
+        o['method'] = 'eth_call'
+        enc = ABIContractEncoder()
+        enc.method('check')
+        enc.typ(ABIContractType.ADDRESS)
+        enc.address(address)
+        data = add_0x(enc.get())
+        tx = self.template(sender_address, contract_address)
+        tx = self.set_code(tx, data)
+        o['params'].append(self.normalize(tx))
+        o['params'].append('latest')
+        o = j.finalize(o)
+        return o
+
