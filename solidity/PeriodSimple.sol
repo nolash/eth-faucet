@@ -34,17 +34,21 @@ contract PeriodSimple {
 		emit BalanceThresholdChange(_threshold);
 	}
 
-	function check(address _subject) public view returns(bool) {
+	function next(address _subject) external view returns(uint256) {
+		return lastUsed[_subject] + period;
+	}
+	
+	function check(address _subject) external view returns(bool) {
 		require(_subject.balance >= balanceThreshold);
 		if (lastUsed[_subject] == 0) {
 			return true;
 		}
-		return block.timestamp > lastUsed[_subject] + period;
+		return block.timestamp > this.next(_subject);
 	}
 
-	function poke(address _subject) public {
+	function poke(address _subject) external {
 		require(msg.sender == owner || msg.sender == poker, 'ERR_ACCESS');
-		require(check(_subject), 'ERR_PREMATURE');
+		require(this.check(_subject), 'ERR_PREMATURE');
 		lastUsed[_subject] = block.timestamp;
 	}
 }

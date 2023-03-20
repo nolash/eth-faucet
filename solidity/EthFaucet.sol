@@ -8,7 +8,7 @@ contract EthFacuet {
 	address public registry;
 	address public periodChecker;
 	uint256 public sealState;
-	uint256 public amount;
+	uint256 amount;
 
 	uint8 constant REGISTRY_STATE = 1;
 	uint8 constant PERIODCHECKER_STATE = 2;
@@ -123,6 +123,25 @@ contract EthFacuet {
 		require(check(_recipient));
 		payable(_recipient).transfer(amount);
 		return amount;
+	}
+
+	function nextTime(address _subject) public returns(uint256) {
+		bool _ok;
+		bytes memory _result;
+
+		(_ok, _result) = periodChecker.call(abi.encodeWithSignature("next(address)", _subject));
+		if (!_ok) {
+			revert('ERR_PERIOD_BACKEND_ERROR');
+		}
+		return uint256(bytes32(_result));
+	}
+
+	function tokenAmount() public view returns(uint256) {
+		return amount;
+	}
+
+	function token() public pure returns(address) {
+		return address(0);
 	}
 
 	receive () payable external {
