@@ -15,10 +15,9 @@ contract EthFacuet {
 	uint8 constant VALUE_STATE = 4;
 	uint256 constant public maxSealState = 7;
 
-	event FaucetUsed(address indexed _recipient, address indexed _token, uint256 _amount);
-	event FaucetFail(address indexed _recipient, address indexed _token, uint256 _amount);
+	event Give(address indexed _recipient, address indexed _token, uint256 _amount);
 	event FaucetAmountChange(uint256 _amount);
-	event FaucetStateChange(uint256 indexed _sealState, address _registry, address _periodChecker);
+	event SealStateChange(uint256 indexed _sealState, address _registry, address _periodChecker);
 	event ImNotGassy();
 
 	constructor() {
@@ -29,7 +28,7 @@ contract EthFacuet {
 		require(_state < 8, 'ERR_INVALID_STATE');
 		require(_state & sealState == 0, 'ERR_ALREADY_LOCKED');
 		sealState |= _state;
-		emit FaucetStateChange(sealState, registry, periodChecker);
+		emit SealStateChange(sealState, registry, periodChecker);
 		return uint256(sealState);
 	}
 
@@ -45,14 +44,14 @@ contract EthFacuet {
 		require(msg.sender == owner, 'ERR_NOT_OWNER');
 		require(sealState & PERIODCHECKER_STATE == 0, 'ERR_SEALED');
 		periodChecker = _checker;
-		emit FaucetStateChange(sealState, registry, periodChecker);
+		emit SealStateChange(sealState, registry, periodChecker);
 	}
 
 	function setRegistry(address _registry) public {
 		require(msg.sender == owner, 'ERR_NOT_OWNER');
 		require(sealState & REGISTRY_STATE == 0, 'ERR_SEALED');
 		registry = _registry;
-		emit FaucetStateChange(sealState, registry, periodChecker);
+		emit SealStateChange(sealState, registry, periodChecker);
 	}
 
 	function checkPeriod(address _recipient) private returns(bool) {
@@ -61,17 +60,14 @@ contract EthFacuet {
 
 		(_ok, _result) = periodChecker.call(abi.encodeWithSignature("check(address)", _recipient));
 		if (!_ok) {
-			emit FaucetFail(_recipient, address(0), amount);
 			revert('ERR_PERIOD_BACKEND_ERROR');
 		}
 		if (_result[31] == 0) {
-			emit FaucetFail(_recipient, address(0), amount);
 			revert('ERR_PERIOD_CHECK');
 		}
 
 		(_ok, _result) = periodChecker.call(abi.encodeWithSignature("poke(address)", _recipient));
 		if (!_ok) {
-			emit FaucetFail(_recipient, address(0), amount);
 			revert('ERR_REGISTRY_BACKEND_ERROR');
 		}
 		return true;
@@ -83,15 +79,13 @@ contract EthFacuet {
 
 		(_ok, _result) = registry.call(abi.encodeWithSignature("have(address)", _recipient));
 		if (!_ok) {
-			emit FaucetFail(_recipient, address(0), amount);
 			revert('ERR_TRANSFER');
 		}
 		if (_result[31] == 0) {
-			emit FaucetFail(_recipient, address(0), amount);
 			revert('ERR_REGISTRY_CHECK');
 		}
 
-		emit FaucetUsed(_recipient, address(0), amount);
+		emit Give(_recipient, address(0), amount);
 		return true;
 	}
 
