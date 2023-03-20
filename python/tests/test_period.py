@@ -232,8 +232,12 @@ class TestFaucetPeriod(EthTesterCase):
         o = c.next_time(self.address, self.accounts[0], sender_address=self.accounts[0])
         r = self.conn.do(o)
         nexttime = int(r, 16)
-
         self.assertEqual(nexttime, thistime+100)
+
+        o = c.check(self.address, self.accounts[0], sender_address=self.accounts[0])
+        r = self.conn.do(o)
+        checked = int(r, 16)
+        self.assertEqual(checked, 0)
 
 
 if __name__ == '__main__':

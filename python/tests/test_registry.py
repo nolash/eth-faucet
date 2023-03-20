@@ -109,6 +109,10 @@ class TestFaucetRegistry(EthTesterCase):
         c = EthFaucet(self.chain_spec, signer=self.signer, nonce_oracle=nonce_oracle)
         o = c.check(self.address, self.accounts[2], sender_address=self.accounts[0])
         r = self.conn.do(o)
+        self.assertEqual(int(r, 16), 0)
+
+        o = c.check(self.address, self.accounts[1], sender_address=self.accounts[0])
+        r = self.conn.do(o)
         self.assertEqual(int(r, 16), 1)
 
 

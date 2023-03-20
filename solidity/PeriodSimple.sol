@@ -46,9 +46,10 @@ contract PeriodSimple {
 		return block.timestamp > this.next(_subject);
 	}
 
-	function poke(address _subject) external {
+	function poke(address _subject) external returns(bool) {
 		require(msg.sender == owner || msg.sender == poker, 'ERR_ACCESS');
 		require(this.check(_subject), 'ERR_PREMATURE');
 		lastUsed[_subject] = block.timestamp;
+		return true;
 	}
 }
