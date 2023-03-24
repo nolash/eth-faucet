@@ -15,26 +15,13 @@ from chainlib.eth.gas import OverrideGasOracle
 
 # local import
 from eth_faucet import EthFaucet
+from eth_faucet.unittest import TestFaucetBase
 
 logging.basicConfig(level=logging.DEBUG)
 logg = logging.getLogger()
 
 
-class TestFaucet(EthTesterCase):
-
-    def setUp(self):
-        super(TestFaucet, self).setUp()
-        self.conn = RPCConnection.connect(self.chain_spec, 'default')
-        nonce_oracle = RPCNonceOracle(self.accounts[0], self.conn)
-        c = EthFaucet(self.chain_spec, signer=self.signer, nonce_oracle=nonce_oracle)
-        (tx_hash_hex, o) = c.constructor(self.accounts[0])
-        r = self.conn.do(o)
-        
-        o = receipt(r)
-        r = self.conn.do(o)
-        self.address = to_checksum_address(r['contract_address'])
-        logg.debug('faucet contract {}'.format(self.address))
-
+class TestFaucet(TestFaucetBase):
 
     def test_basic(self):
         nonce_oracle = RPCNonceOracle(self.accounts[0], self.conn)
@@ -55,6 +42,10 @@ class TestFaucet(EthTesterCase):
 
 
     def test_basic_funding(self):
+        o = balance(self.accounts[2])
+        r = self.conn.do(o)
+        prebalance = int(r, 16)
+
         nonce_oracle = RPCNonceOracle(self.accounts[0], self.conn)
         c = EthFaucet(self.chain_spec, signer=self.signer, nonce_oracle=nonce_oracle)
         (tx_hash_hex, o) = c.give_to(self.address, self.accounts[0], self.accounts[2])
@@ -63,28 +54,18 @@ class TestFaucet(EthTesterCase):
         r = self.conn.do(o)
         self.assertEqual(r['status'], 1)
         
-        o = balance(self.accounts[9])
-        r = self.conn.do(o)
-        prebalance = int(r, 16)
-
-        o = receipt(tx_hash_hex)
-        r = self.conn.do(o)
-        self.assertEqual(r['status'], 1)
-
         o = balance(self.accounts[2])
         r = self.conn.do(o)
         self.assertEqual(int(r, 16), prebalance)
 
         (tx_hash, o) = c.set_amount(self.address, self.accounts[0], 1000)
         r = self.conn.do(o)
-
         o = receipt(tx_hash_hex)
         r = self.conn.do(o)
         self.assertEqual(r['status'], 1)
 
         (tx_hash_hex, o) = c.give_to(self.address, self.accounts[0], self.accounts[2])
         self.conn.do(o)
-
         o = receipt(tx_hash_hex)
         r = self.conn.do(o)
         self.assertEqual(r['status'], 0)
@@ -146,6 +127,7 @@ class TestFaucet(EthTesterCase):
         r = self.conn.do(o)
         self.assertEqual(int(r, 16), prebalance - cost + 1000)
 
+
     def test_payable_with_tx_data(self):
         nonce_oracle = RPCNonceOracle(self.accounts[0], self.conn)
         c = EthFaucet(self.chain_spec, signer=self.signer, nonce_oracle=nonce_oracle)
@@ -168,6 +150,8 @@ class TestFaucet(EthTesterCase):
         o = balance(self.accounts[0])
         r = self.conn.do(o)
         self.assertEqual(int(r, 16), prebalance - cost)
+
+
 
 if __name__ == '__main__':
     unittest.main()

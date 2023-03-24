@@ -85,7 +85,7 @@ contract EthFacuet {
 	}
 
 	function checkBalance() private view returns(bool) {
-		return amount >= address(this).balance;
+		return amount <= address(this).balance;
 	}
 
 	function check(address _recipient) public returns(bool) {

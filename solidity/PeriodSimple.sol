@@ -39,7 +39,9 @@ contract PeriodSimple {
 	}
 	
 	function check(address _subject) external view returns(bool) {
-		require(_subject.balance >= balanceThreshold);
+		if (balanceThreshold > 0 && _subject.balance >= balanceThreshold) {
+			return false;
+		}
 		if (lastUsed[_subject] == 0) {
 			return true;
 		}
@@ -48,7 +50,9 @@ contract PeriodSimple {
 
 	function poke(address _subject) external returns(bool) {
 		require(msg.sender == owner || msg.sender == poker, 'ERR_ACCESS');
-		require(this.check(_subject), 'ERR_PREMATURE');
+		if (!this.check(_subject)) {
+			return false;
+		}
 		lastUsed[_subject] = block.timestamp;
 		return true;
 	}
