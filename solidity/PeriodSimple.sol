@@ -1,6 +1,6 @@
-pragma solidity >0.8.0;
+pragma solidity >=0.8.0;
 
-// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 contract PeriodSimple {
 
@@ -12,6 +12,7 @@ contract PeriodSimple {
 
 	event PeriodChange(uint256 _value);
 	event BalanceThresholdChange(uint256 _value);
+
 	constructor() {
 		owner = msg.sender;
 		poker = owner;
