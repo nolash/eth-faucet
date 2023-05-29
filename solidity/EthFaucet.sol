@@ -6,8 +6,8 @@ contract EthFaucet {
 
 	// Implements ERC173
 	address public owner;
-	address registry;
-	address periodChecker;
+	address public registry;
+	address public periodChecker;
 
 	// Implements Faucet
 	address constant public token = address(0);
