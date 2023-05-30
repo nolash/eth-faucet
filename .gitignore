@@ -4,4 +4,5 @@ build/
 dist/
 solidity/*.json
 solidity/*.bin
+*.egg-info
 .venv
