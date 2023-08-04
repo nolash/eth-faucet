@@ -85,6 +85,9 @@ contract PeriodSimple {
 		if (_sum == 0x3ef25013) { // ACL
 			return true;
 		}
+		if (_sum == 0x242824a9) { // Throttle
+			return true;
+		}
 		return false;
 	}
 }
