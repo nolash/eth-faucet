@@ -83,7 +83,7 @@ contract EthFaucet {
 			return true;
 		}
 
-		(_ok, _result) = periodChecker.call(abi.encodeWithSignature("check(address)", _recipient));
+		(_ok, _result) = periodChecker.call(abi.encodeWithSignature("have(address)", _recipient));
 		if (!_ok) {
 			revert('ERR_PERIOD_BACKEND');
 		}

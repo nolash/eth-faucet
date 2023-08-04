@@ -13,6 +13,9 @@ contract PeriodSimple {
 	event PeriodChange(uint256 _value);
 	event BalanceThresholdChange(uint256 _value);
 
+	// Implements ERC173
+	event OwnershipTransferred(address indexed previousOwner, address indexed newOwner); // EIP173
+
 	constructor() {
 		owner = msg.sender;
 		poker = owner;
@@ -39,7 +42,8 @@ contract PeriodSimple {
 		return lastUsed[_subject] + period;
 	}
 	
-	function check(address _subject) external view returns(bool) {
+	//function check(address _subject) external view returns(bool) {
+	function have(address _subject) external view returns(bool) {
 		if (balanceThreshold > 0 && _subject.balance >= balanceThreshold) {
 			return false;
 		}
@@ -51,10 +55,36 @@ contract PeriodSimple {
 
 	function poke(address _subject) external returns(bool) {
 		require(msg.sender == owner || msg.sender == poker, 'ERR_ACCESS');
-		if (!this.check(_subject)) {
+		if (!this.have(_subject)) {
 			return false;
 		}
 		lastUsed[_subject] = block.timestamp;
 		return true;
+	}
+
+	// Implements EIP173
+	function transferOwnership(address _newOwner) public returns (bool) {
+		address oldOwner;
+		require(msg.sender == owner, 'ERR_AXX');
+
+		oldOwner = owner;
+		owner = _newOwner;
+
+		emit OwnershipTransferred(oldOwner, owner);
+		return true;
+	}
+
+	// Implements ERC165
+	function supportsInterface(bytes4 _sum) public pure returns (bool) {
+		if (_sum == 0x01ffc9a7) { // ERC165
+			return true;
+		}
+		if (_sum == 0x9493f8b2) { // ERC173
+			return true;
+		}
+		if (_sum == 0x3ef25013) { // ACL
+			return true;
+		}
+		return false;
 	}
 }

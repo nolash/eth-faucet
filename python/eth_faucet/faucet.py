@@ -104,4 +104,3 @@ class EthFaucet(Faucet):
         o['params'].append('latest')
         o = j.finalize(o)
         return o
-
